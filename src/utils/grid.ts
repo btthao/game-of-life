@@ -1,10 +1,21 @@
 import { numCols, numRows } from "./constants";
 
 export const generateInitialGrid = () => {
-  //   console.log("run generate intial");
   const grid = [];
   for (let i = 0; i < numRows; i++) {
     grid.push(new Array(numCols).fill(0));
+  }
+  return grid;
+};
+
+export const generateRandomGrid = () => {
+  const grid = [];
+  for (let i = 0; i < numRows; i++) {
+    let row = [];
+    for (let k = 0; k < numCols; k++) {
+      row.push(Math.random() > 0.7 ? 1 : 0);
+    }
+    grid.push(row);
   }
   return grid;
 };

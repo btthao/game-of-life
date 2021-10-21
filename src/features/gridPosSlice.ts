@@ -1,12 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../app/store";
-import { numCols, numRows } from "../utils/constants";
+import {
+  maxSquareSize,
+  minSquareSize,
+  numCols,
+  numRows,
+} from "../utils/constants";
 
 export interface GridPosState {
   xPos: number;
   yPos: number;
-  windowXPos: number;
-  windowYPos: number;
   move: number;
   squareSize: number;
   containerWidth: number;
@@ -16,8 +19,6 @@ export interface GridPosState {
 const initialState: GridPosState = {
   xPos: 0,
   yPos: 0,
-  windowXPos: 0,
-  windowYPos: 0,
   move: 80,
   squareSize: 18,
   containerWidth: 0,
@@ -28,7 +29,7 @@ export const gridPosSlice = createSlice({
   name: "gridPos",
   initialState,
   reducers: {
-    moveUp: (state) => {
+    moveDown: (state) => {
       const { yPos, containerHeight, move, squareSize } = state;
       if (yPos > containerHeight - squareSize * numRows) {
         if (yPos - move > containerHeight - squareSize * numRows) {
@@ -38,7 +39,8 @@ export const gridPosSlice = createSlice({
         }
       }
     },
-    moveDown: (state) => {
+
+    moveUp: (state) => {
       const { yPos, move } = state;
       if (yPos < 0) {
         if (yPos + move < 0) {
@@ -48,21 +50,19 @@ export const gridPosSlice = createSlice({
         }
       }
     },
-    moveLeft: (state) => {
+
+    moveRight: (state) => {
       const { xPos, move, containerWidth, squareSize } = state;
       if (xPos > containerWidth - squareSize * numCols) {
         if (xPos - move > containerWidth - squareSize * numCols) {
           state.xPos -= move;
-          // state.windowXPos += (move * 2) / squareSize;
         } else {
           state.xPos = containerWidth - squareSize * numCols;
-          // state.windowXPos =
-          //   2 * numCols -
-          //   Math.ceil((2 * numCols * containerWidth) / (squareSize * numCols));
         }
       }
     },
-    moveRight: (state) => {
+
+    moveLeft: (state) => {
       const { xPos, move } = state;
       if (xPos < 0) {
         if (xPos + move < 0) {
@@ -72,22 +72,18 @@ export const gridPosSlice = createSlice({
         }
       }
     },
-    setContainerSize: (state, action) => {
+
+    setContainerSize: (
+      state,
+      action: PayloadAction<{ height: number; width: number }>
+    ) => {
       state.containerHeight = action.payload.height;
       state.containerWidth = action.payload.width;
       gridPosSlice.caseReducers.adjustWhenResize(state);
     },
 
     adjustWhenResize: (state) => {
-      const {
-        xPos,
-        windowXPos,
-        yPos,
-        windowYPos,
-        containerHeight,
-        containerWidth,
-        squareSize,
-      } = state;
+      const { xPos, yPos, containerHeight, containerWidth, squareSize } = state;
 
       if (yPos < containerHeight - squareSize * numRows) {
         state.yPos = containerHeight - squareSize * numRows;
@@ -100,28 +96,17 @@ export const gridPosSlice = createSlice({
       } else if (xPos > 0) {
         state.xPos = 0;
       }
-
-      // if (
-      //   windowXPos >
-      //   2 * numCols -
-      //     Math.ceil((2 * numCols * containerWidth) / (squareSize * numCols))
-      // ) {
-      //   state.windowXPos =
-      //     2 * numCols -
-      //     Math.ceil((2 * numCols * containerWidth) / (squareSize * numCols));
-      // } else if (windowXPos < 0) {
-      //   state.windowXPos = 0;
-      // }
     },
 
-    zoomIn: (state) => {
-      if (state.squareSize < 28) {
+    incSquareSize: (state) => {
+      if (state.squareSize < maxSquareSize) {
         state.squareSize += 1;
       }
       gridPosSlice.caseReducers.adjustWhenResize(state);
     },
-    zoomOut: (state) => {
-      if (state.squareSize > 16) {
+
+    decSquareSize: (state) => {
+      if (state.squareSize > minSquareSize) {
         state.squareSize -= 1;
       }
       gridPosSlice.caseReducers.adjustWhenResize(state);
@@ -136,8 +121,8 @@ export const {
   moveUp,
   setContainerSize,
   adjustWhenResize,
-  zoomIn,
-  zoomOut,
+  incSquareSize,
+  decSquareSize,
 } = gridPosSlice.actions;
 
 export const selectGridPos = (state: RootState) => state.gridPos;

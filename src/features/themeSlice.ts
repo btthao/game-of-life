@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../app/store";
 import { theme } from "../utils/style";
 
@@ -12,10 +12,10 @@ export interface ThemeState {
 const initialState: ThemeState = theme[0];
 
 export const themeSlice = createSlice({
-  name: "gridInfo",
+  name: "theme",
   initialState,
   reducers: {
-    changeTheme: (state, action) => {
+    changeTheme: (state, action: PayloadAction<ThemeState>) => {
       const { name, text, bg, canvasfill } = action.payload;
       state.bg = bg;
       state.name = name;

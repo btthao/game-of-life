@@ -10,17 +10,10 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                bowlby: ["Bowlby One SC", "mono"],
-            },
-            gridTemplateColumns: {
-                100: "repeat(100, 18px)",
+                bowlby: ['"Bowlby One SC"', "Helvetica", "Arial", "sans-serif"],
             },
             height: {
                 "100vw": "100vw",
-                square: "18px",
-            },
-            width: {
-                square: "18px",
             },
             maxHeight: {
                 "35rem": "35rem",
@@ -28,8 +21,8 @@ module.exports = {
             maxWidth: {
                 "3xl": "1800px",
             },
-            borderWidth: {
-                0.5: "0.5px",
+            minWidth: {
+                sm: "500px",
             },
         },
     },

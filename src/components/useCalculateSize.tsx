@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 
 export const useCalculateSize = (ref: React.MutableRefObject<any>) => {
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
-  // console.log("run size function");
+  const [width, setWidth] = useState<number>(0);
+  const [height, setHeight] = useState<number>(0);
 
-  const calculate: any = useCallback(() => {
-    //console.log("run callbackfunc");
+  const calculate = useCallback(() => {
     setWidth(ref.current.offsetWidth);
     setHeight(ref.current.offsetHeight);
   }, [ref]);

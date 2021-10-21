@@ -1,21 +1,19 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import produce from "immer";
 import { RootState } from "../app/store";
 import { neighborsPos, numCols, numRows } from "../utils/constants";
-import { generateInitialGrid } from "../utils/grid";
+import { generateInitialGrid, generateRandomGrid } from "../utils/grid";
 
 export interface GridInfoState {
   grid: number[][];
   population: number;
   numGenerations: number;
-  speed: number;
 }
 
 const initialState: GridInfoState = {
   grid: generateInitialGrid(),
   population: 0,
   numGenerations: 0,
-  speed: 1,
 };
 
 export const gridInfoSlice = createSlice({
@@ -23,11 +21,10 @@ export const gridInfoSlice = createSlice({
   initialState,
   reducers: {
     automation: (state) => {
-      state.grid = produce(state.grid, (gridCopy) => {
+      state.grid = produce(state.grid, (newgrid) => {
         for (let r = 0; r < numRows; r++) {
           for (let c = 0; c < numCols; c++) {
             let neighbors = 0;
-
             for (const pos of neighborsPos) {
               const [x, y] = pos;
               const neighborR = r + x;
@@ -43,9 +40,9 @@ export const gridInfoSlice = createSlice({
             }
 
             if (neighbors < 2 || neighbors > 3) {
-              gridCopy[r][c] = 0;
+              newgrid[r][c] = 0;
             } else if (state.grid[r][c] === 0 && neighbors === 3) {
-              gridCopy[r][c] = 1;
+              newgrid[r][c] = 1;
             }
           }
         }
@@ -53,30 +50,35 @@ export const gridInfoSlice = createSlice({
       state.numGenerations += 1;
       gridInfoSlice.caseReducers.countLives(state);
     },
+
     countLives: (state) => {
       let count = 0;
       for (let r = 0; r < numRows; r++) {
         for (let c = 0; c < numCols; c++) {
-          if (state.grid[r][c] === 1) {
-            count += 1;
-          }
+          count += state.grid[r][c];
         }
       }
       state.population = count;
     },
-    createLives: (state, action) => {
+
+    createLives: (state, action: PayloadAction<{ r: number; c: number }>) => {
       const { r, c } = action.payload;
-      state.grid = produce(state.grid, (gridCopy) => {
-        gridCopy[r][c] = 1;
-      });
-      gridInfoSlice.caseReducers.countLives(state);
+      if (state.grid[r][c] === 0) {
+        state.grid = produce(state.grid, (newgrid) => {
+          newgrid[r][c] = 1;
+        });
+        state.population += 1;
+      }
     },
-    killCells: (state, action) => {
+
+    killCells: (state, action: PayloadAction<{ r: number; c: number }>) => {
       const { r, c } = action.payload;
-      state.grid = produce(state.grid, (gridCopy) => {
-        gridCopy[r][c] = 0;
-      });
-      gridInfoSlice.caseReducers.countLives(state);
+      if (state.grid[r][c] === 1) {
+        state.grid = produce(state.grid, (newgrid) => {
+          newgrid[r][c] = 0;
+        });
+        state.population -= 1;
+      }
     },
 
     clear: (state) => {
@@ -84,10 +86,16 @@ export const gridInfoSlice = createSlice({
       state.population = 0;
       state.numGenerations = 0;
     },
+
+    random: (state) => {
+      state.grid = generateRandomGrid();
+      gridInfoSlice.caseReducers.countLives(state);
+      state.numGenerations = 0;
+    },
   },
 });
 
-export const { createLives, killCells, automation, clear } =
+export const { createLives, killCells, automation, clear, random } =
   gridInfoSlice.actions;
 
 export const selectGridInfo = (state: RootState) => state.gridInfo;

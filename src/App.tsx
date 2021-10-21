@@ -1,34 +1,33 @@
 import React from "react";
+import { useAppSelector } from "./app/hooks";
+import Canvas from "./components/Canvas";
 import Commands from "./components/Commands";
 import DarkMode from "./components/DarkMode";
 import GridInfo from "./components/GridInfo";
-import Canvas from "./components/Canvas";
-import UserInput from "./components/UserInput";
-import Window from "./components/Window";
-import { useAppSelector } from "./app/hooks";
+import Information from "./components/Information";
+import Preview from "./components/Preview";
 import { selectTheme } from "./features/themeSlice";
 
-interface AppProps {}
-
-const App: React.FC<AppProps> = () => {
+const App: React.FC = () => {
   const { text } = useAppSelector(selectTheme);
   return (
-    <div className="max-w-3xl m-auto text-gray-700 dark:text-gray-200">
-      <div className=" px-10 py-3   m-auto flex w-full items-center justify-between">
-        <h1 className={` font-bowlby text-4xl ${text} `}>Game of Life</h1>
+    <section className="max-w-3xl px-6 min-w-sm m-auto text-gray-800 dark:text-gray-200">
+      <div className="sm:px-4 py-6 flex w-full items-center justify-between">
+        <h1 className={`font-bowlby text-4xl font-semibold ${text} `}>
+          Game of Life
+        </h1>
         <DarkMode />
       </div>
-
-      <div>
+      <div className="grid place-items-center sm:flex sm:justify-between sm:mx-4 md:mx-10 ">
         <GridInfo />
-        <Commands />
-        <UserInput />
+        <Preview />
       </div>
-      <Window />
-      <div className=" m-3 md:m-8 lg:mx-12 bg-gray-400 dark:bg-gray-600 p-2 rounded-md ">
+      <Commands />
+      <div className=" w-full h-100vw max-h-35rem bg-gray-400 dark:bg-gray-700 overflow-hidden p-2 rounded-md  ">
         <Canvas />
       </div>
-    </div>
+      <Information />
+    </section>
   );
 };
 

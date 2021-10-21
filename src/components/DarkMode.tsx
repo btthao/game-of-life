@@ -3,18 +3,16 @@ import { FormControl, FormLabel, Switch } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { useAppSelector } from "../app/hooks";
 import { selectTheme } from "../features/themeSlice";
-interface DarkModeProps {}
 
-const DarkMode: React.FC<DarkModeProps> = () => {
+const DarkMode: React.FC = () => {
   const [isDark, setIsDark] = useState(true);
   const { name } = useAppSelector(selectTheme);
+
   useEffect(() => {
     window.localStorage.removeItem("chakra-ui-color-mode");
-    // window.localStorage.setItem("chakra-ui-color-mode", "dark");
   }, []);
 
   useEffect(() => {
-    // console.log("change");
     if (isDark) {
       document.documentElement.classList.add("dark");
     } else {

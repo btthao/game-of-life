@@ -8,12 +8,12 @@ import {
   selectGridInfo,
 } from "../features/gridInfoSlice";
 import { selectGridPos, setContainerSize } from "../features/gridPosSlice";
+import { selectTheme } from "../features/themeSlice";
 import { numCols, numRows } from "../utils/constants";
 import { isValidCell } from "../utils/grid";
+import ChangeSize from "./ChangeSize";
 import MoveGrid from "./MoveGrid";
 import { useCalculateSize } from "./useCalculateSize";
-import Zoom from "./ChangeSize";
-import { selectTheme } from "../features/themeSlice";
 
 const Canvas: React.FC = () => {
   const { grid } = useAppSelector(selectGridInfo);
@@ -25,10 +25,14 @@ const Canvas: React.FC = () => {
   const [isPressed, setIsPressed] = useState(false);
   const [isDel, setIsDel] = useState(false);
   const { canvasfill } = useAppSelector(selectTheme);
+  const [inCanvas, setInCanvas] = useState(false);
+
   // for click
   useEffect(() => {
-    if (clickedPos.r < 0 && clickedPos.c < 0) return;
+    if ((clickedPos.r < 0 && clickedPos.c < 0) || !inCanvas) return;
+
     const check = isValidCell(clickedPos.r, clickedPos.c, squareSize);
+
     if (check !== null) {
       const { r, c } = check;
       if (isDel) {
@@ -37,13 +41,16 @@ const Canvas: React.FC = () => {
         dispatch(createLives({ r, c }));
       }
     }
-    setClickedPos({ r: -1, c: -1 });
-  }, [clickedPos, squareSize, isDel, dispatch]);
 
+    setClickedPos({ r: -1, c: -1 });
+  }, [clickedPos, squareSize, isDel, dispatch, inCanvas]);
+
+  // resize screen
   useEffect(() => {
     dispatch(setContainerSize({ width, height }));
   }, [width, height, dispatch]);
 
+  // press shift
   useEffect(() => {
     const pressShift = (e: any) => {
       if (e.key === "Shift") {
@@ -56,6 +63,7 @@ const Canvas: React.FC = () => {
     };
     window.addEventListener("keydown", pressShift);
     window.addEventListener("keyup", pressShift);
+
     return () => {
       window.removeEventListener("keydown", pressShift);
       window.removeEventListener("keyup", pressShift);
@@ -78,7 +86,15 @@ const Canvas: React.FC = () => {
       setClickedPos({ r, c });
     });
 
-    p5.frameRate(1000);
+    c.mouseOut(() => {
+      setInCanvas(false);
+    });
+
+    c.mouseOver(() => {
+      setInCanvas(true);
+    });
+
+    p5.frameRate(100);
   };
 
   const draw = (p5: p5Types) => {
@@ -99,14 +115,13 @@ const Canvas: React.FC = () => {
         } else {
           p5.fill(canvasfill);
         }
-        p5.stroke(0);
         p5.rect(x, y, squareSize, squareSize);
       }
     }
   };
 
   const selectByDrag = (p5: p5Types) => {
-    if (isPressed) {
+    if (isPressed && inCanvas) {
       const check = isValidCell(p5.mouseY, p5.mouseX, squareSize);
       if (check !== null) {
         const { r, c } = check;
@@ -122,10 +137,10 @@ const Canvas: React.FC = () => {
   return (
     <div
       ref={gridContainerRef}
-      className="w-full h-100vw max-h-35rem   relative   m-auto   bg-gray-100 dark:bg-gray-500 overflow-hidden "
+      className="w-full h-full relative overflow-hidden "
     >
       <MoveGrid />
-      <Zoom />
+      <ChangeSize />
       <div
         style={{
           left: `${xPos}px`,
